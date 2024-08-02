@@ -164,7 +164,6 @@ class Status(models.Model):
 
 
 class UserCustomuser(models.Model):
-    id = models.BigAutoField(primary_key=True)
     password = models.CharField(max_length=128)
     last_login = models.DateTimeField(blank=True, null=True)
     is_superuser = models.BooleanField()
@@ -176,7 +175,6 @@ class UserCustomuser(models.Model):
     email = models.CharField(unique=True, max_length=254)
     cpf = models.CharField(max_length=50, blank=True, null=True)
     role = models.ForeignKey(Role, models.DO_NOTHING, db_column='role', blank=True, null=True)
-
 
     class Meta:
         managed = False

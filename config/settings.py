@@ -11,10 +11,15 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+load_dotenv()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -24,8 +29,25 @@ SECRET_KEY = (
     "django-insecure-$227hjjmuq2e!)o^@2&#2v#+(-=@$v362o@8g#s9!2)tjn1)1a"
 )
 
-ALLOWED_HOSTS = []
 
+DATABASE_HOST = os.getenv("DB_HOST")
+DATABASE_PORT = os.getenv("DB_PORT")
+DATABASE_NAME = os.getenv("DB_NAME")
+DATABASE_USERNAME = os.getenv("DB_USERNAME")
+DATABASE_PASSWORD = os.getenv("DB_PASSWORD")
+
+DATABASE_SCHEMA = os.getenv("DB_SCHEMA")
+
+ALLOWED_HOSTS = ["localhost", ".vercel.app", "127.0.0.1"]
+
+DEV_CLIENT = os.getenv("DEV_CLIENT")
+
+CORS_ALLOWED_ORIGINS = [
+    DEV_CLIENT
+]
+
+
+AUTH_USER_MODEL = "user.UserCustomuser"
 
 # Application definition
 
@@ -36,7 +58,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
     "apps.core",
+    "apps.user"
 ]
 
 MIDDLEWARE = [
@@ -73,14 +98,18 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'your-db-name',
-        'USER': 'your-db-user',
-        'PASSWORD': 'your-db-user-password',
-        'HOST': 'your-db-host',
-        'PORT': 'your-db-port',
-    }
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": DATABASE_NAME,
+        "USER": DATABASE_USERNAME,
+        "PASSWORD": DATABASE_PASSWORD,
+        "HOST": DATABASE_HOST,
+        "PORT": DATABASE_PORT,
+        "OPTIONS": {
+            "sslmode": "require",
+            "options": f"-c search_path={DATABASE_SCHEMA},public",
+        },
+    },
 }
 
 
@@ -108,12 +137,46 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "America/Sao_Paulo"
 
 USE_I18N = True
 
 USE_TZ = True
 
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": False,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "VERIFYING_KEY": None,
+    "AUDIENCE": None,
+    "ISSUER": None,
+    "JWK_URL": None,
+    "LEEWAY": 0,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
+    "TOKEN_OBTAIN_SERIALIZER": ".apps.user.serializers.CustomTokenObtainPairSerializer",
+    "JTI_CLAIM": "jti",
+    "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
+    "SLIDING_TOKEN_LIFETIME": timedelta(hours=15),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=90),
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
