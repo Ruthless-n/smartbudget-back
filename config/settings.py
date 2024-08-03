@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "apps.core",
     "apps.user",
+    "apps.role",
     "apps.category"
 ]
 

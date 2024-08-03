@@ -2,9 +2,11 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from .managers import CustomUserManager
+from apps.core.models import Role
     
 
-# Create your models here.
+
+
 class UserCustomuser(AbstractBaseUser, PermissionsMixin):
     id = models.BigAutoField(primary_key=True)
     password = models.CharField(max_length=128)
@@ -16,12 +18,14 @@ class UserCustomuser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField()
     date_joined = models.DateTimeField(auto_now_add=True)
     email = models.CharField(unique=True, max_length=254)
+    cpf = models.CharField(max_length=50, blank=True, null=True)
+    role = models.ForeignKey(Role, models.DO_NOTHING, db_column='role', blank=True, null=True, related_name='user_role')
 
-
-    objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
+
+    objects = CustomUserManager()
 
     class Meta:
         managed = False

@@ -1,33 +1,48 @@
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from django.db import models
-from django.utils.translation import gettext_lazy as _
-from .managers import CustomUserManager
-from apps.core.models import Role
-    
+from rest_framework import serializers
+from config import settings
+from django.contrib.auth import get_user_model
+from apps.role.serializers import RoleSerializer
+from django.utils.module_loading import import_string
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from django.utils import timezone
 
+User = get_user_model()
 
-
-class UserCustomuser(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    password = models.CharField(max_length=128)
-    last_login = models.DateTimeField(blank=True, null=True)
-    is_superuser = models.BooleanField()
-    first_name = models.CharField(max_length=150)
-    last_name = models.CharField(max_length=150)
-    is_staff = models.BooleanField()
-    is_active = models.BooleanField()
-    date_joined = models.DateTimeField()
-    email = models.CharField(unique=True, max_length=254)
-    cpf = models.CharField(max_length=50, blank=True, null=True)
-    role = models.ForeignKey(Role, models.DO_NOTHING, db_column='role', blank=True, null=True)
-
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
-
-    objects = CustomUserManager()
+class UserSerializer(serializers.ModelSerializer):
+  
+    role = RoleSerializer(read_only=True)
 
     class Meta:
-        managed = False
-        db_table = 'user_customuser'
+        model = User
+        fields = ['id', 'first_name', 'last_name', 'email', 'password', 'is_staff', 'is_superuser','cpf', 'role']
+        extra_kwargs = {'password': {'write_only': True}}
+
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            email=validated_data['email'],
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', ''),
+            password=validated_data['password'],
+            is_staff=validated_data.get('is_staff', False),
+            is_superuser=validated_data.get('is_superuser', False),
+            is_active=validated_data.get('is_active', True),
+            cpf=validated_data.get('cpf', True),
+            role=validated_data.get('role', True),
+
+        )
+        return user
+
+    def update(self, instance, validated_data):
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.is_staff = validated_data.get('is_staff', instance.is_staff)
+        instance.is_superuser = validated_data.get('is_superuser', instance.is_superuser)
+        
+        if 'password' in validated_data:
+            instance.set_password(validated_data['password'])
+        instance.is_active = validated_data.get('is_active', instance.is_active)
+        instance.save()
+        return instance
 
