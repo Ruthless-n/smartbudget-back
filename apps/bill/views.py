@@ -6,7 +6,7 @@ from .serializers import BillSerializer
 
 
 
-api_view(['POST', 'GET'])
+@api_view(['POST', 'GET'])
 def list_bills(request):
 
     if request.method == 'GET':
@@ -21,7 +21,7 @@ def list_bills(request):
 
 
 
-api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET', 'PUT', 'DELETE'])
 def detail_bills(request, id_bill):
 
 
