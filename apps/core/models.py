@@ -84,6 +84,7 @@ class Bill(models.Model):
     payday = models.DateTimeField(blank=True, null=True)
     category = models.ForeignKey('Category', models.DO_NOTHING)
     status = models.ForeignKey('Status', models.DO_NOTHING)
+    bill_name = models.CharField(max_length=150, blank=True, null=True)
 
     class Meta:
         managed = False
