@@ -16,7 +16,11 @@ def list_bills(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
         
     if request.method == 'POST':
-        serializer = BillSerializer(data=request.data)
+        data = request.data
+        if isinstance(data, list):
+            serializer = BillSerializer(data=data, many=True)
+        else:
+            serializer = BillSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
