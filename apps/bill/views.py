@@ -4,17 +4,23 @@ from rest_framework import status
 from apps.core.models import Bill
 from .serializers import BillSerializer
 
-
-    
-
 @api_view(['POST', 'GET'])
 def list_bills(request):
-
     if request.method == 'GET':
+        responsible = request.query_params.get('responsible', None)
+        status_filter = request.query_params.get('status', None)
+        
         bills = Bill.objects.all()
+
+        if responsible is not None:
+            bills = bills.filter(responsible=responsible)
+        if status_filter is not None:
+            bills = bills.filter(status=status_filter)
+        
         serializer = BillSerializer(bills, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-        
+    
+
     if request.method == 'POST':
         data = request.data
         if isinstance(data, list):
