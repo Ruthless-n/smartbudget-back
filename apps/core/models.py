@@ -85,6 +85,7 @@ class Bill(models.Model):
     category = models.ForeignKey('Category', models.DO_NOTHING)
     status = models.ForeignKey('Status', models.DO_NOTHING)
     bill_name = models.CharField(max_length=150, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     class Meta:
         managed = False
