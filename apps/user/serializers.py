@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from apps.core.models import Role
 from config import settings
 from django.contrib.auth import get_user_model
 from apps.role.serializers import RoleSerializer
@@ -12,10 +13,11 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
   
     role = RoleSerializer(read_only=True)
+    role_id = serializers.PrimaryKeyRelatedField(queryset=Role.objects.all(), write_only=True, source='role')
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'email', 'password', 'is_staff', 'is_superuser','cpf', 'role']
+        fields = ['id', 'first_name', 'last_name', 'email', 'password', 'is_staff', 'is_superuser','cpf', 'role', 'role_id']
         extra_kwargs = {'password': {'write_only': True}}
 
 

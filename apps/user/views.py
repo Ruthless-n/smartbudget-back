@@ -4,11 +4,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import UserCustomuser
 from .serializers import UserSerializer
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
-from . import views
 
 
 @api_view(['POST'])

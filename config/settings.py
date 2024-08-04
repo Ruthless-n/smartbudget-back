@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "corsheaders",
     "rest_framework_simplejwt.token_blacklist",
     "apps.core",
     "apps.user",
@@ -74,6 +75,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
