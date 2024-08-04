@@ -63,3 +63,11 @@ def detail_bills(request, id_bill):
     
 
     return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+@api_view(['GET'])
+def list_bills_by_user(request, responsible):
+    if request.method == 'GET':
+        bills = Bill.objects.filter(responsible=responsible)
+        serializer = BillSerializer(bills, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
