@@ -20,7 +20,7 @@ def list_bills(request):
         if isinstance(data, list):
             serializer = BillSerializer(data=data, many=True)
         else:
-            serializer = BillSerializer(data=data)
+            serializer = BillSerializer(data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
