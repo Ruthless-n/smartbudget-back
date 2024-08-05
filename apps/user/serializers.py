@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.core.models import Role
+from apps.core.models import Bill, Role
 from config import settings
 from django.contrib.auth import get_user_model
 from apps.role.serializers import RoleSerializer
@@ -7,6 +7,7 @@ from django.utils.module_loading import import_string
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.utils import timezone
+from django.db.models import Sum
 
 User = get_user_model()
 
@@ -14,13 +15,18 @@ class UserSerializer(serializers.ModelSerializer):
   
     role = RoleSerializer(read_only=True)
     role_id = serializers.PrimaryKeyRelatedField(queryset=Role.objects.all(), write_only=True, source='role')
+    total_spent = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'email', 'password', 'is_staff', 'is_superuser','cpf', 'role', 'role_id']
+        fields = ['id', 'first_name', 'last_name', 'email', 'password', 'is_staff', 'is_superuser','cpf', 'role', 'role_id', 'total_spent']
         extra_kwargs = {'password': {'write_only': True}}
 
 
+    def get_total_spent(self, obj):
+        bills = Bill.objects.filter(responsible=obj.id).aggregate(total_spent=Sum('amount'))
+        return bills['total_spent'] or 0
+    
     def create(self, validated_data):
         user = User.objects.create_user(
             email=validated_data['email'],
