@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from apps.core.models import Bill
 from .serializers import BillSerializer
+from datetime import datetime
+from django.db.models import Sum
 
 @api_view(['POST', 'GET'])
 def list_bills(request):
@@ -77,3 +79,26 @@ def list_bills_by_user(request, responsible):
         serializer = BillSerializer(bills, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response({'message': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+@api_view(['GET'])
+def get_total(request):
+    responsible_id = request.query_params.get('responsible', None)
+    category_id = request.query_params.get('category', None)
+    start_date = request.query_params.get('start_date', None)
+    end_date = request.query_params.get('end_date', None)
+    
+    if responsible_id:
+        bills = Bill.objects.filter(responsible=responsible_id).aggregate(total_spent=Sum('amount'))
+    elif category_id:
+        bills = Bill.objects.filter(category=category_id).aggregate(total_spent=Sum('amount'))
+    elif start_date and end_date:
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date, '%Y-%m-%d')
+            bills = Bill.objects.filter(due_date__range=[start_date, end_date]).aggregate(total_spent=Sum('amount'))
+        except ValueError:
+            return Response({'message': 'Invalid date format. Use YYYY-MM-DD.'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({'message': 'No valid filter provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(bills, status=status.HTTP_200_OK)
