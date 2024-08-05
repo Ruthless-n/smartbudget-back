@@ -6,8 +6,12 @@ from .models import UserCustomuser
 from .serializers import UserSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-@api_view(['POST'])
+@api_view(['GET','POST'])
 def create_user(request):
+    if request.method == 'GET':
+        users = UserCustomuser.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     if request.method == 'POST':
         request_email = request.data.get('email')
