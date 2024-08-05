@@ -99,6 +99,6 @@ def get_total(request):
         except ValueError:
             return Response({'message': 'Invalid date format. Use YYYY-MM-DD.'}, status=status.HTTP_400_BAD_REQUEST)
     else:
-        return Response({'message': 'No valid filter provided'}, status=status.HTTP_400_BAD_REQUEST)
+        bills = Bill.objects.all().aggregate(total_spent=Sum('amount'))
 
     return Response(bills, status=status.HTTP_200_OK)
