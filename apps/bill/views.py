@@ -82,6 +82,7 @@ def list_bills_by_user(request, responsible):
 
 @api_view(['GET'])
 def get_total(request):
+    user = request.user
     responsible_id = request.query_params.get('responsible', None)
     category_id = request.query_params.get('category', None)
     start_date = request.query_params.get('start_date', None)
@@ -99,6 +100,6 @@ def get_total(request):
         except ValueError:
             return Response({'message': 'Invalid date format. Use YYYY-MM-DD.'}, status=status.HTTP_400_BAD_REQUEST)
     else:
-        bills = Bill.objects.all().aggregate(total_spent=Sum('amount'))
+        bills = Bill.objects.filter(responsible=user.id).aggregate(total_spent=Sum('amount'))
 
     return Response(bills, status=status.HTTP_200_OK)
